@@ -5,7 +5,8 @@ Open Cybersecurity Audit AI is an AI-assisted web security testing platform desi
 
 ## System Overview
 The platform is designed as a modular pipeline where a target web application is analyzed through multiple stages, resulting in a structured security report.
-<img width="500" height="707" alt="Screenshot 2026-04-10 114641" src="https://github.com/user-attachments/assets/840a6d92-01dd-4966-afe6-359e8dbbd60b" />
+<img width="402" height="512" alt="Untitled Diagram-Page-2 drawio" src="https://github.com/user-attachments/assets/af0bce2f-57dd-4b8a-83d0-6ebf4699c22f" />
+
 
 ## Execution Flow
 
