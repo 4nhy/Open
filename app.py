@@ -1035,9 +1035,6 @@ def render_dashboard():
             
     st.markdown("---")
     
-    if not IMPORTS_SUCCESS:
-        st.error("CRITICAL: Could not import scanner classes from `main_syber.py`. Ensure the file is in the same directory.")
-        return
 
     # Target Input
     st.markdown("#### Server Availability Check")
