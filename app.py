@@ -992,7 +992,7 @@ def generate_html_report(target, logs):
     <body>
         <div class="header">
             <h1>0pen Security Audit Report</h1>
-            <p><b>Target:</b> {target} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Date:</b> {datetime.now().strftime("%Y-%m-%d %H:%M UTC")}</p>
+            <p><b>Target:</b> {target} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Date:</b> {datetime.datetime.now().strftime("%Y-%m-%d %H:%M UTC")}</p>
         </div>
         
         <div class="box">
