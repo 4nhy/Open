@@ -10,7 +10,7 @@ The platform is designed as a modular pipeline where a target web application is
 ## Execution Flow
 
 The following flowchart illustrates the end-to-end execution process of the system, starting from user input and progressing through AI-driven interaction, traffic analysis, data flow tracking, and vulnerability detection, ultimately resulting in the generation of a structured security report.
-<img width="416" height="1102" alt="Untitled Diagram-Page-1 drawio" src="https://github.com/user-attachments/assets/912ddbd3-81da-472f-ace3-9bc33b2bbb55" />
+      <img width="416" height="1102" alt="Untitled Diagram-Page-1 drawio" src="https://github.com/user-attachments/assets/912ddbd3-81da-472f-ace3-9bc33b2bbb55" />
 
 ## ## Component Explanation
 
