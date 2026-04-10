@@ -1,3 +1,4 @@
+import base64
 import streamlit as st
 import pandas as pd
 import time
@@ -941,16 +942,12 @@ No actionable vulnerabilities requiring immediate remediation were identified. I
 - Ensure Web Application Firewalls (WAF) and logging mechanisms remain active to monitor for anomalous traffic spikes.
 """
 
-def generate_html_report(target, logs):
-    # 1. Parse logs for severity metrics
-    total_high = 0
-    total_med = 0
-    total_low = 0
-    
-    for module, log_text in logs.items():
-        total_high += log_text.count("[VULN]") + log_text.count("POTENTIAL SQL INJECTION") + log_text.count("CONFIRMED XSS")
-        total_med += log_text.count("[WARN]")
-        total_low += log_text.count("[INFO]")
+
+
+def generate_html_report(target, logs, api_key):
+    total_high = sum(log_text.count("[VULN]") + log_text.count("POTENTIAL SQL INJECTION") + log_text.count("CONFIRMED XSS") for log_text in logs.values())
+    total_med = sum(log_text.count("[WARN]") for log_text in logs.values())
+    total_low = sum(log_text.count("[INFO]") for log_text in logs.values())
     
     scan_data = {
         "target": target,
@@ -958,11 +955,14 @@ def generate_html_report(target, logs):
         "detailed_logs": logs
     }
 
-    # 2. Generate Assets
     generate_graph(scan_data["summary"])
-    ai_text = generate_ai_report(scan_data)
+    ai_text = generate_ai_report(api_key, scan_data)
 
-    # 3. Build HTML (Sleek Dark Mode Design)
+    # Convert the generated graph into a Base64 string so it embeds directly into the HTML
+    with open("graph.png", "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode()
+    img_src = f"data:image/png;base64,{encoded_string}"
+
     html_content = f"""
     <html>
     <head>
@@ -1022,7 +1022,6 @@ def generate_html_report(target, logs):
         f.write(html_content)
 
     return html_filename
-
 
 # ==========================================
 # VIEW 1: THE DASHBOARD
