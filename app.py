@@ -890,7 +890,7 @@ def generate_ai_report(data):
     # HARDCODE YOUR DEEPSEEK API KEY HERE
     # ==============================================================
     api_key = "YOUR-API-KEY"
-    
+
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     prompt = f"""
     You are a senior penetration tester.
@@ -942,26 +942,28 @@ No actionable vulnerabilities requiring immediate remediation were identified. I
 - Ensure Web Application Firewalls (WAF) and logging mechanisms remain active to monitor for anomalous traffic spikes.
 """
 
+def generate_html_report(target, logs):
+    # 1. Parse logs for severity metrics
+    total_high = 0
+    total_med = 0
+    total_low = 0
 
-def generate_html_report(target, logs, api_key):
-    total_high = sum(log_text.count("[VULN]") + log_text.count("POTENTIAL SQL INJECTION") + log_text.count("CONFIRMED XSS") for log_text in logs.values())
-    total_med = sum(log_text.count("[WARN]") for log_text in logs.values())
-    total_low = sum(log_text.count("[INFO]") for log_text in logs.values())
-    
+    for module, log_text in logs.items():
+        total_high += log_text.count("[VULN]") + log_text.count("POTENTIAL SQL INJECTION") + log_text.count("CONFIRMED XSS")
+        total_med += log_text.count("[WARN]")
+        total_low += log_text.count("[INFO]")
+
     scan_data = {
         "target": target,
         "summary": {"high": total_high, "medium": total_med, "low": total_low},
         "detailed_logs": logs
     }
 
+    # 2. Generate Assets
     generate_graph(scan_data["summary"])
-    ai_text = generate_ai_report(api_key, scan_data)
+    ai_text = generate_ai_report(scan_data)
 
-    # Convert the generated graph into a Base64 string so it embeds directly into the HTML
-    with open("graph.png", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode()
-    img_src = f"data:image/png;base64,{encoded_string}"
-
+    # 3. Build HTML (Sleek Dark Mode Design)
     html_content = f"""
     <html>
     <head>
@@ -972,14 +974,18 @@ def generate_html_report(target, logs, api_key):
             .header {{ border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px; }}
             .header h1 {{ margin: 0; color: #f8fafc; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }}
             .header p {{ margin: 5px 0 0 0; color: #94a3b8; font-size: 14px; }}
+            
             .box {{ background-color: #1e293b; padding: 25px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 30px; }}
             h2 {{ color: #60a5fa; font-size: 20px; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; }}
+            
             table {{ width: 100%; border-collapse: collapse; margin-bottom: 20px; }}
             td {{ padding: 15px; text-align: center; border: 1px solid #334155; background-color: #0f172a; border-radius: 6px; width: 33%; }}
+            
             .high {{ color: #ef4444; font-size: 28px; font-weight: bold; display: block; }}
             .medium {{ color: #f59e0b; font-size: 28px; font-weight: bold; display: block; }}
             .low {{ color: #10b981; font-size: 28px; font-weight: bold; display: block; }}
             .label {{ font-size: 12px; color: #94a3b8; text-transform: uppercase; margin-top: 5px; display: block; }}
+            
             .chart-container {{ text-align: center; margin-top: 20px; }}
             pre {{ background-color: #0f172a; color: #e2e8f0; padding: 20px; border-radius: 6px; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; border: 1px solid #334155; font-size: 14px; line-height: 1.5; }}
         </style>
@@ -989,6 +995,7 @@ def generate_html_report(target, logs, api_key):
             <h1>0pen Security Audit Report</h1>
             <p><b>Target:</b> {target} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Date:</b> {datetime.datetime.now().strftime("%Y-%m-%d %H:%M UTC")}</p>
         </div>
+        
         <div class="box">
             <h2>Risk Overview</h2>
             <table>
@@ -999,9 +1006,10 @@ def generate_html_report(target, logs, api_key):
                 </tr>
             </table>
             <div class="chart-container">
-                <img src="{img_src}" width="350">
+                <img src="{os.path.abspath('graph.png')}" width="350">
             </div>
         </div>
+
         <div class="box">
             <h2>AI Diagnostic Analysis</h2>
             <pre>{ai_text}</pre>
@@ -1009,15 +1017,12 @@ def generate_html_report(target, logs, api_key):
     </body>
     </html>
     """
-    
+
     html_filename = "0pen_Security_Report.html"
     with open(html_filename, "w", encoding="utf-8") as f:
         f.write(html_content)
 
     return html_filename
-
-
-
 
 
 # ==========================================
@@ -1035,9 +1040,9 @@ def render_dashboard():
             st.session_state.server_available = None
             st.session_state.checked_domain = ""
             st.rerun()
-            
+
     st.markdown("---")
-    
+
 
     # Target Input
     st.markdown("#### Server Availability Check")
@@ -1062,21 +1067,21 @@ def render_dashboard():
     if st.session_state.server_available is True:
         st.success(f"Connection established. Server **{st.session_state.checked_domain}** is online.")
         st.markdown("<br><h4>Select Attack Modules</h4>", unsafe_allow_html=True)
-        
+
         modules = ["SQL Injection", "XSS", "Brute Force", "Security Misconfig", "Cryptographic Failures", "Vulnerable Components"]
         grid_col1, grid_col2 = st.columns(2)
         selected_modules = []
-        
+
         for index, module_name in enumerate(modules):
             if st.session_state.just_checked: time.sleep(0.15)
             target_col = grid_col1 if index % 2 == 0 else grid_col2
             with target_col:
                 if st.toggle(module_name, key=f"toggle_{index}"):
                     selected_modules.append(module_name)
-        
+
         st.session_state.just_checked = False
         st.markdown("<br>", unsafe_allow_html=True)
-        
+
         if st.button("🚀 Execute Modules & Generate Report", type="primary", use_container_width=True):
             if not selected_modules:
                 st.warning("Please select at least one module.")
@@ -1084,10 +1089,10 @@ def render_dashboard():
                 target_url = st.session_state.checked_domain
                 if not target_url.startswith("http"):
                     target_url = "http://" + target_url
-                
+
                 captured_logs = {}
                 st.markdown("### Execution Status")
-                
+
                 # Execute modules
                 for module in selected_modules:
                     with st.spinner(f"Running {module} payload..."):
@@ -1108,7 +1113,7 @@ def render_dashboard():
                                     VulnerableComponentScanner(target_url).run_scan()
                             except Exception as e:
                                 print(f"FATAL SCRIPT ERROR: {str(e)}")
-                        
+
                         clean_output = strip_ansi(f.getvalue())
                         if not clean_output.strip(): clean_output = "Module executed successfully (No output)."
                         captured_logs[module] = clean_output
@@ -1117,10 +1122,10 @@ def render_dashboard():
                 # Generate Report
                 with st.spinner("Compiling data and generating AI HTML Report..."):
                     html_file_path = generate_html_report(target_url, captured_logs)
-                    
+
                     st.markdown("---")
                     st.markdown("### 🎉 Audit Complete")
-                    
+
                     # Provide Download Button
                     with open(html_file_path, "rb") as html_file:
                         st.download_button(
