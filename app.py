@@ -824,23 +824,26 @@ if 'checked_domain' not in st.session_state:
 if 'just_checked' not in st.session_state:
     st.session_state.just_checked = False
 
-# ==========================================
-# HELPER FUNCTIONS
-# ==========================================
 def check_server_availability(hostname):
+    """
+    Checks if the server is online using a socket connection to web ports.
+    This bypasses cloud restrictions that block standard ICMP ping packets.
+    """
     clean_host = hostname.replace("http://", "").replace("https://", "").split("/")[0].strip()
-    if not clean_host: return False
-    param = '-n' if platform.system().lower() == 'windows' else '-c'
-    command = ['ping', param, '2', clean_host]
-    try:
-        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return result.returncode == 0
-    except Exception:
+    if not clean_host: 
         return False
+    
+    # Check port 443 (HTTPS) first, fallback to port 80 (HTTP)
+    for port in [443, 80]:
+        try:
+            # Create a rapid 3-second socket connection
+            with socket.create_connection((clean_host, port), timeout=3):
+                return True # If it connects, the server is alive
+        except OSError:
+            continue
+            
+    return False
 
-def strip_ansi(text):
-    ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
-    return ansi_escape.sub('', text)
 
 # ==========================================
 # REPORT GENERATION PIPELINE
