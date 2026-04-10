@@ -943,7 +943,6 @@ No actionable vulnerabilities requiring immediate remediation were identified. I
 """
 
 
-
 def generate_html_report(target, logs, api_key):
     total_high = sum(log_text.count("[VULN]") + log_text.count("POTENTIAL SQL INJECTION") + log_text.count("CONFIRMED XSS") for log_text in logs.values())
     total_med = sum(log_text.count("[WARN]") for log_text in logs.values())
@@ -973,18 +972,14 @@ def generate_html_report(target, logs, api_key):
             .header {{ border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 30px; }}
             .header h1 {{ margin: 0; color: #f8fafc; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }}
             .header p {{ margin: 5px 0 0 0; color: #94a3b8; font-size: 14px; }}
-            
             .box {{ background-color: #1e293b; padding: 25px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 30px; }}
             h2 {{ color: #60a5fa; font-size: 20px; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase; }}
-            
             table {{ width: 100%; border-collapse: collapse; margin-bottom: 20px; }}
             td {{ padding: 15px; text-align: center; border: 1px solid #334155; background-color: #0f172a; border-radius: 6px; width: 33%; }}
-            
             .high {{ color: #ef4444; font-size: 28px; font-weight: bold; display: block; }}
             .medium {{ color: #f59e0b; font-size: 28px; font-weight: bold; display: block; }}
             .low {{ color: #10b981; font-size: 28px; font-weight: bold; display: block; }}
             .label {{ font-size: 12px; color: #94a3b8; text-transform: uppercase; margin-top: 5px; display: block; }}
-            
             .chart-container {{ text-align: center; margin-top: 20px; }}
             pre {{ background-color: #0f172a; color: #e2e8f0; padding: 20px; border-radius: 6px; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; border: 1px solid #334155; font-size: 14px; line-height: 1.5; }}
         </style>
@@ -994,7 +989,6 @@ def generate_html_report(target, logs, api_key):
             <h1>0pen Security Audit Report</h1>
             <p><b>Target:</b> {target} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Date:</b> {datetime.datetime.now().strftime("%Y-%m-%d %H:%M UTC")}</p>
         </div>
-        
         <div class="box">
             <h2>Risk Overview</h2>
             <table>
@@ -1005,10 +999,9 @@ def generate_html_report(target, logs, api_key):
                 </tr>
             </table>
             <div class="chart-container">
-                <img src="{os.path.abspath('graph.png')}" width="350">
+                <img src="{img_src}" width="350">
             </div>
         </div>
-
         <div class="box">
             <h2>AI Diagnostic Analysis</h2>
             <pre>{ai_text}</pre>
@@ -1022,6 +1015,10 @@ def generate_html_report(target, logs, api_key):
         f.write(html_content)
 
     return html_filename
+
+
+
+
 
 # ==========================================
 # VIEW 1: THE DASHBOARD
