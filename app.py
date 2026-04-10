@@ -844,7 +844,11 @@ def check_server_availability(hostname):
             
     return False
 
-
+def strip_ansi(text):
+    """Removes terminal color codes so output renders cleanly in Streamlit."""
+    ansi_escape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
+    return ansi_escape.sub('', text)
+    
 # ==========================================
 # REPORT GENERATION PIPELINE
 # ==========================================
